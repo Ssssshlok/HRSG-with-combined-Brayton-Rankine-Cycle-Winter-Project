@@ -1,0 +1,40 @@
+T0 = 300;
+u0 = 450 + 1.1*T0 + 0.0012*T0^2 ;
+
+%% part 1: solving du/dt 
+
+tspan = [0 4000]; 
+
+odefun1 = @(t,u) 5000*exp(-0.002*t) + 1500*(1 - exp(-0.01*(( -1.1 + sqrt((1.1)^2 +((u-450)*(0.0048)) ) )/0.0024))) ;
+
+[t,u] = ode45(odefun1,tspan,u0);
+
+figure(1)
+plot(t,u)
+legend("u vs t")
+grid on
+hold on
+%% part 2: solving dT/dt 
+
+for i = 1:65
+T(i) = ( -1.1 + sqrt((1.1)^2 + (u(i)-450)*(0.0048)) )/(0.0024) ;
+
+end 
+figure(2)
+plot (t,T)
+legend("T vs t")
+grid on
+
+%% part 3: when r(T) >= q_ext(t) 
+i = 1;
+while i <= 65
+
+if 1500*(1 - exp(-0.01*T(i))) >= 5000*(exp(-0.002*t(i)))
+    break;
+end
+
+i = i + 1; 
+
+end
+
+fprintf("the value of time at which r(T) >= q_ext(t) : %f ", t(i-1))
