@@ -1,0 +1,33 @@
+T1 = 320;
+T2 = 820;
+
+%% symbolic int()
+syms T
+p = ( 700 + 0.35*T - (2*(10^(-4)))*(T.^2) ) ;
+z = int(p,T,T1,T2);
+fprintf("the value of delta u (kJ/kg) using symbolic int() : %f \n", z/1000)
+
+%% integral(f,a,b) method
+
+f = @(T) ( 700 + 0.35*T - (2*(10^(-4)))*(T.^2) ) ;
+I1 = integral(f,T1,T2,'AbsTol', 1e-4);
+fprintf("the value of delta u (kJ/kg) using integral() : %f \n ", I1/1000)
+
+%% trapz(x,y) method
+N = 2;
+while N < 1000
+x = linspace(T1,T2,N);
+y = ( 700 + 0.35.*x - (2*(10^(-4))).*(x.^2) ) ;
+
+I2 = trapz(x,y);
+
+err = abs(( I2 - delta_u_ana)/delta_u_ana) ; 
+
+if err <= 0.001
+    break;
+end
+N = N + 1; 
+end 
+
+fprintf("the value of delta u (kJ/kg) using trapz() : %f \n", I2/1000)
+fprintf("the minimum value of grid number: %d \n", N)
