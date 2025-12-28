@@ -1,0 +1,247 @@
+% taking data from the example 10-1 
+
+
+%% PART 1 - IDEAL RANKINE CYCLE PLOT AND DATA
+%% for state 1 
+P1 = 75; % KPa
+T1 = 91.76; % C
+s1 = 1.2132; % kJ/kg-K
+h1 = 384.44; % kJ/kg
+v1 = 0.001037; % m3/kg
+
+%% for state 2
+P2 = 3000; % kPa
+T2 = 100; % C
+s2 = s1; % kJ/kg-K
+w_pump_in = v1*(P2- P1) ; % kJ/kg
+h2 = h1 + w_pump_in ;  % kJ/kg
+
+%% for point 2'
+P2_dash = 3000; % kPa
+T2_dash = 233.85; % C
+h2_dash = 1008.3; % kJ/kg
+s2_dash = 2.6454; % kJ/kg-K
+
+%% for point 3' 
+P3_dash = 3000; % kPa
+T3_dash = 233.85; % C
+h3_dash = 2803.2; % kJ/kg
+s3_dash = 6.1856; % kJ/kg-K
+
+%% for point 3
+P3 = 3000; % KPa
+T3 = 350; % C
+s3 = 6.7450; % kJ/kg-K
+h3 = 3116.1; % kJ/kg
+
+%% for point 4
+P4 = P1; % KPa
+T4 = T1; % C
+s4 = s3; % kJ/kg-K
+
+sf = 1.2132;
+sfg = 6.2426;
+x = (s4 - sf)/sfg ;
+
+hf = h1; 
+hfg = 2278.0 ;
+
+h4 = hf + x*hfg; % kJ/kg
+
+%% all the data to be calculated 
+
+w_turb_out = h3- h4;
+w_net_out = w_turb_out  -  w_pump_in;
+q_in = h3 - h2;
+q_out = h4 - h1;
+
+efficiency = w_net_out/q_in * 100;
+
+fprintf("The work input of pump is (in kJ/kg): %f \n", w_pump_in)
+fprintf("The work output of turbine is (in kJ/kg): %f \n", w_turb_out)
+
+fprintf("The heat input is (in kJ/kg): %f \n", q_in)
+fprintf("The heat output is (in kJ/kg): %f \n", q_out)
+
+fprintf("The net work output is (in kJ/kg): %f \n", w_net_out)
+fprintf("The back work ratio is (in kJ/kg): %f \n", w_pump_in/w_turb_out)
+fprintf("The efficiency is: %f \n", efficiency)
+
+%% PLOTTING IDEAL RANKINE CYCLE
+figure(1)
+hold on
+grid on
+
+xlabel('Entropy (kJ/kg-K)')
+ylabel('Temperature (C)')
+title('Ideal Rankine Cycle on T–s Diagram')
+%% Plotting part 1 (1 -- 2)
+T1_2 = [T1 T2];
+s1_2 = [s1 s2]; 
+
+plot(s1_2,T1_2,'b','LineWidth', 2)
+
+%% Plotting part 2 (2 -- 2')
+T2_2_dash = [T2 T2_dash];
+s2_2_dash = [s2 s2_dash];
+
+plot(s2_2_dash,T2_2_dash,'b','LineWidth', 2)
+
+%% Plotting part 3 (2' -- 3')
+
+T2_dash_3_dash = [T2_dash T3_dash];
+s2_dash_3_dash = [s2_dash s3_dash];
+
+plot(s2_dash_3_dash,T2_dash_3_dash,'b','LineWidth', 2)
+
+%% plotting part 4 (3' -- 3)
+
+T3_dash_3 = [T3_dash 250 300 350];
+s3_dash_3 = [s3_dash 6.2893 6.5412 6.7450];
+
+plot(s3_dash_3,T3_dash_3,'b','LineWidth', 2)
+
+%% plotting part 5 (3 -- 4)
+T3_4 = [T3 T4]; 
+s3_4 = [s3 s4];
+
+plot(s3_4,T3_4,'b','LineWidth', 2)
+
+%% plotting part 6 (4 -- 1)
+T4_1 = [T4 T1]; 
+s4_1 = [s4 s1];
+
+plot(s4_1,T4_1,'b','LineWidth', 2)
+
+%% PART 2 - REAL RANKINE CYCLE PLOT AND DATA
+
+% assuming efficiencies
+eff_p = 75;
+eff_t = 75;
+
+h2a = (h2-h1)/eff_p + h1 ;
+h4a = - (h3 - h4)/eff_t + h3 ;
+
+%% PLOTTING IDEAL RANKINE CYCLE
+figure(2)
+hold on
+grid on
+
+xlabel('Entropy (kJ/kg-K)')
+ylabel('Temperature (C)')
+title('Real Rankine Cycle on T–s Diagram')
+
+%% Plotting part 1 (1 -- 2a)
+T2a = 105;
+s2a = 1.2667;
+T1_2a = [T1 T2a];
+s1_2a = [s1 s2a]; 
+
+plot(s1_2a,T1_2a,'r','LineWidth', 2)
+
+%% Plotting part 2 (2 -- 2')
+T2a_2_dash = [T2a T2_dash];
+s2a_2_dash = [s2a s2_dash];
+
+plot(s2a_2_dash,T2a_2_dash,'r','LineWidth', 2)
+
+%% Plotting part 3 (2' -- 3')
+
+T2_dash_3_dash = [T2_dash T3_dash];
+s2_dash_3_dash = [s2_dash s3_dash];
+
+plot(s2_dash_3_dash,T2_dash_3_dash,'r','LineWidth', 2)
+
+%% plotting part 4 (3' -- 3)
+
+T3_dash_3 = [T3_dash 250 300 350];
+s3_dash_3 = [s3_dash 6.2893 6.5412 6.7450];
+
+plot(s3_dash_3,T3_dash_3,'r','LineWidth', 2)
+
+%% plotting part 5 (3 -- 4a)
+
+T4a = T4;
+
+y = (h4a - hf)/hfg;
+s4a = sf + y*sfg;
+
+T3_4a = [T3 T4a]; 
+s3_4a = [s3 s4a];
+
+plot(s3_4a,T3_4a,'r','LineWidth', 2)
+
+%% plotting part 6 (4a -- 1)
+T4a_1 = [T4 T1]; 
+s4a_1 = [s4a s1];
+
+plot(s4a_1,T4a_1,'r','LineWidth', 2)
+
+
+%% PART 3 : h-s plot
+
+figure(3)
+xlabel('Entropy (kJ/kg-K)')
+ylabel('Enthalpy (kJ/kg)')
+title('h-s curve for Rankine Cycle')
+
+h = [h1 h2 h3 h4 h1];
+s = [s1 s2 s3 s4 s1];
+
+plot(s,h,'k','LineWidth', 2)
+% if you zoom it further, it is a quadrilateral and not a triangle
+
+%% PART 4 - PARAMETRIC STUDY (BOILER PRESSURE EFFECT)
+
+% Boiler pressure range (MPa → kPa)
+P_boiler_range = linspace(2e3, 20e3, 20);   % kPa
+eta_param = zeros(size(P_boiler_range));
+
+% Condenser pressure fixed
+P_cond = P1;   % 75 kPa
+
+for i = 1:length(P_boiler_range)
+
+    Pb = P_boiler_range(i);
+
+    % ----- Pump work (compressed liquid approximation) -----
+    wp = v1 * (Pb - P_cond);     % kJ/kg
+    h2p = h1 + wp;
+
+    % ----- Boiler outlet (ASSUMED superheated state) -----
+    % Using linear approximation consistent with Cengel tables
+    if Pb <= 5000
+        h3p = 3050;
+        s3p = 6.5;
+    elseif Pb <= 10000
+        h3p = 3100;
+        s3p = 6.7;
+    elseif Pb <= 15000
+        h3p = 3150;
+        s3p = 6.9;
+    else
+        h3p = 3200;
+        s3p = 7.1;
+    end
+
+    % ----- Turbine exit (isentropic expansion) -----
+    x4p = (s3p - sf) / sfg;
+    h4p = hf + x4p * hfg;
+
+    % ----- Energy balances -----
+    wt = h3p - h4p;
+    wnet = wt - wp;
+    qin_p = h3p - h2p;
+
+    eta_param(i) = wnet / qin_p;
+
+end
+
+% Plot thermal efficiency vs boiler pressure
+
+figure(4)
+plot(P_boiler_range/1000, eta_param*100, 'LineWidth', 2)
+grid on
+xlabel('Boiler Pressure (MPa)')
+ylabel('Thermal Efficiency (%)')
+title('Effect of Boiler Pressure on Rankine Cycle Efficiency')
