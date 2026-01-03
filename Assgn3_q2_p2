@@ -1,0 +1,197 @@
+%% INPUT PARAMETERS
+
+k = 1.4;
+R = 0.2870;
+
+Cp = @(T) 28.11 + 0.1967e-2.*T + 0.4802e-5.*T.^2 + 21.966e-9.*T.^3;   % kJ/kmol-K (air)
+
+Cp_mass = @(T) Cp(T)./28.97;   % kJ/kg-K
+
+T1 = 300;
+P1 = 100;
+
+Rp = 8;
+
+T3 = 1300;
+P2 = P1*Rp;
+
+P3 = P2;
+P4 = P1;
+
+eff_comp = 0.75;
+eff_turb = 0.75;
+
+%% IDEAL BRAYTON CYCLE
+
+T2 = T1 * Rp^((k-1)/k);
+T4 = T3 / Rp^((k-1)/k);
+
+q_in = integral(Cp_mass,T2,T3);
+q_out = integral(Cp_mass,T1,T4);
+w_in_comp = integral(Cp_mass,T1,T2);
+w_out_turb = integral(Cp_mass,T4,T3);
+
+eff_th_ideal = 1 - q_out/q_in;
+
+fprintf(" IDEAL BRAYTON CYCLE RESULTS \n\n")
+fprintf(" Thermal Efficiency of overall cycle: %f \n", eff_th_ideal)
+fprintf(" heat input in one cycle (in kJ/kg): %f \n", q_in)
+fprintf(" heat output in one cycle (in kJ/kg): %f \n", q_out)
+fprintf(" work input of compressor in one cycle (in kJ/kg): %f \n", w_in_comp)
+fprintf(" work output of turbine in one cycle (in kJ/kg): %f \n", w_out_turb )
+fprintf(" ideal back work ratio is: %f \n \n ", w_in_comp/w_out_turb )
+
+s1 = 0;
+s2 = s1;
+s3 = integral(@(T) Cp_mass(T)./T,T2,T3) - R*log(P3/P2);
+s4 = s3;
+
+%% REAL BRAYTON CYCLE
+
+h1 = 0;
+h2 = integral(Cp_mass,T1,T2);
+h3 = h2 + integral(Cp_mass,T2,T3);
+h4 = h3 - integral(Cp_mass,T4,T3);
+
+h1a = h1;
+h2a = (h2-h1)/eff_comp + h1;
+h3a = h3;
+h4a = h3 - eff_turb*(h3 - h4);
+
+T1a = T1;
+T2a = (T2-T1)/eff_comp + T1;
+T3a = T3;
+T4a = T3 - eff_turb*(T3 - T4);
+
+q_in_R = h3a - h2a;
+q_out_R = h4a - h1a;
+w_in_comp_R = h2a - h1a;
+w_out_turb_R = h3a - h4a;
+eff_th_real = (w_out_turb_R - w_in_comp_R)/q_in_R;
+
+fprintf("REAL BRAYTON CYCLE RESULTS \n\n")
+fprintf("Thermal Efficiency of overall cycle: %f \n", eff_th_real)
+fprintf("heat input in one cycle (in kJ/kg): %f \n", q_in_R)
+fprintf("heat output in one cycle (in kJ/kg): %f \n", q_out_R)
+fprintf("work input of compressor in one cycle (in kJ/kg): %f \n", w_in_comp_R)
+fprintf("work output of turbine in one cycle (in kJ/kg): %f \n", w_out_turb_R )
+fprintf("real back work ratio is: %f \n\n", w_in_comp_R/w_out_turb_R )
+
+%% ENTROPY (REAL)
+
+s1a = 0;
+s2a = s1a + integral(@(T) Cp_mass(T)./T,T1a,T2a) - R*log(P2/P1);
+s3a = s2a + integral(@(T) Cp_mass(T)./T,T2a,T3a) - R*log(P3/P2);
+s4a = s3a + integral(@(T) Cp_mass(T)./T,T3a,T4a) - R*log(P4/P3);
+
+%% ================= IDEAL BRAYTON CYCLE =================
+
+%% IDEAL T–s DIAGRAM
+
+figure(1)
+hold on
+grid on
+xlabel("Entropy (kJ/kg-K)")
+ylabel("Temperature (K)")
+title("T-s Diagram of IDEAL BRAYTON CYCLE")
+
+% 1–2 (isentropic compression)
+plot([s1 s2],[T1 T2],'r',LineWidth=2)
+
+% 3–4 (isentropic expansion)
+plot([s3 s4],[T3 T4],'r',LineWidth=2)
+
+% 2–3 (constant pressure heat addition)
+TempVec23 = linspace(T2,T3,100);
+EntroVec23 = arrayfun(@(T) s2 + integral(@(x) Cp_mass(x)./x,T2,T),TempVec23);
+plot(EntroVec23,TempVec23,'r',LineWidth=2)
+
+% 4–1 (constant pressure heat rejection)
+TempVec41 = linspace(T4,T1,100);
+EntroVec41 = arrayfun(@(T) s4 + integral(@(x) Cp_mass(x)./x,T4,T),TempVec41);
+plot(EntroVec41,TempVec41,'r',LineWidth=2)
+
+%% IDEAL P–v DIAGRAM
+
+figure(2)
+hold on
+grid on
+xlabel("Specific Volume (m^3/kg)")
+ylabel("Pressure (kPa)")
+title("P-v Diagram of IDEAL BRAYTON CYCLE")
+
+v1 = R*T1/P1;
+v2 = R*T2/P2;
+v3 = R*T3/P3;
+v4 = R*T4/P4;
+
+% 2–3 (constant pressure)
+plot([v2 v3],[P2 P3],'b',LineWidth=2)
+
+% 4–1 (constant pressure)
+plot([v4 v1],[P4 P1],'b',LineWidth=2)
+
+% 1–2 (isentropic)
+Pvec12 = linspace(P1,P2,100);
+Tvec12 = T1*(Pvec12/P1).^((k-1)/k);
+vvec12 = R*Tvec12./Pvec12;
+plot(vvec12,Pvec12,'b',LineWidth=2)
+
+% 3–4 (isentropic)
+Pvec34 = linspace(P3,P4,100);
+Tvec34 = T3*(Pvec34/P3).^((k-1)/k);
+vvec34 = R*Tvec34./Pvec34;
+plot(vvec34,Pvec34,'b',LineWidth=2)
+
+%% ================= REAL BRAYTON CYCLE =================
+
+%% REAL T–s DIAGRAM
+
+figure(3)
+hold on
+grid on
+xlabel("Entropy (kJ/kg-K)")
+ylabel("Temperature (K)")
+title("T-s Diagram of REAL BRAYTON CYCLE")
+
+% 1–2 (real compression)
+plot([s1a s2a],[T1a T2a],'k',LineWidth=2)
+
+% 3–4 (real expansion)
+plot([s3a s4a],[T3a T4a],'k',LineWidth=2)
+
+% 2–3 (constant pressure heat addition)
+TempVec23a = linspace(T2a,T3a,100);
+EntroVec23a = arrayfun(@(T) s2a + integral(@(x) Cp_mass(x)./x,T2a,T),TempVec23a);
+plot(EntroVec23a,TempVec23a,'k',LineWidth=2)
+
+% 4–1 (constant pressure heat rejection)
+TempVec41a = linspace(T4a,T1a,100);
+EntroVec41a = arrayfun(@(T) s4a + integral(@(x) Cp_mass(x)./x,T4a,T),TempVec41a);
+plot(EntroVec41a,TempVec41a,'k',LineWidth=2)
+
+%% REAL P–v DIAGRAM
+
+figure(4)
+hold on
+grid on
+xlabel("Specific Volume (m^3/kg)")
+ylabel("Pressure (kPa)")
+title("P-v Diagram of REAL BRAYTON CYCLE")
+
+v1a = R*T1a/P1;
+v2a = R*T2a/P2;
+v3a = R*T3a/P3;
+v4a = R*T4a/P4;
+
+% 1–2 (real compression)
+plot([v1a v2a],[P1 P2],'g',LineWidth=2)
+
+% 2–3 (constant pressure)
+plot([v2a v3a],[P2 P3],'g',LineWidth=2)
+
+% 3–4 (real expansion)
+plot([v3a v4a],[P3 P4],'g',LineWidth=2)
+
+% 4–1 (constant pressure)
+plot([v4a v1a],[P4 P1],'g',LineWidth=2)
