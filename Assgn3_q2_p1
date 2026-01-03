@@ -1,0 +1,275 @@
+%% INPUT PARAMETERS
+
+k = 1.4; % k = Cp/Cv 
+R = 0.2870; % in kJ/kg-K
+Cp_constant = 1.005; % in kJ/kg-K
+
+T1 = 300; % inlet temperature compressor (in K)
+P1 = 100; % inlet pressure compressor (in kPa)
+
+Rp = 8; % pressure ratio 
+
+
+T3 = 1300; % inlet temperature turbine (in K)
+P2 = P1*Rp; % inlet pressure turbine (in kPa)
+
+P3 = P2;
+P4 = P1; 
+
+eff_comp = 0.75;
+eff_turb = 0.75;
+%% IDEAL BRAYTON CYCLE 
+
+T2 = T1 * Rp^((k-1)/k);
+T4 = T3 / Rp^((k-1)/k);
+
+eff_th_ideal = 1 - 1/(Rp)^((k-1)/k);
+q_in = Cp_constant*(T3 - T2);
+q_out = Cp_constant*(T4 - T1);
+w_in_comp = Cp_constant*(T2 - T1);
+w_out_turb = Cp_constant*(T3 - T4);
+
+fprintf(" IDEAL BRAYTON CYCLE RESULTS \n\n")
+fprintf(" Thermal Efficiency of overall cycle: %f \n", eff_th_ideal)
+fprintf(" heat input in one cycle (in kJ/kg): %f \n", q_in)
+fprintf(" heat output in one cycle (in kJ/kg): %f \n", q_out)
+fprintf(" work input of compressor in one cycle (in kJ/kg): %f \n", w_in_comp)
+fprintf(" work output of turbine in one cycle (in kJ/kg): %f \n", w_out_turb )
+fprintf(" ideal back work ratio is: %f \n \n ", w_in_comp/w_out_turb )
+
+% calculating entropy
+s1 = 0; % takin reference entropy to be zero
+s2 = s1;
+s3 = Cp_constant*log(T3/T2) - R*log(P3/P2);
+s4 = s3; 
+
+%% calculating and plotting T,s
+
+
+figure(1)
+hold on 
+grid on 
+xlabel("Entropy (J/kg-K)");
+ylabel("Temperature (K)");
+title("T-s Diagram of IDEAL BRAYTON CYCLE");
+
+
+% plotting first and third part
+TempVec1 = [T1 T2];
+EntroVec1 = [s1 s2 ];
+plot(EntroVec1,TempVec1,'r',LineWidth=2)
+
+TempVec3 = [T3 T4];
+EntroVec3 = [s3 s4 ];
+plot(EntroVec3,TempVec3,'r',LineWidth=2)
+
+
+% plotting second part
+TempVec2 = linspace(T2,T3,99);
+PresVec1 = P2*ones(1,99);
+EntroVec2 = s2 + Cp_constant*log(TempVec2/T2);
+
+plot(EntroVec2,TempVec2,'r',LineWidth=2)
+
+% plotting fourth part
+TempVec4 = linspace(T4,T1,99);
+PresVec2 = P1*ones(1,99);
+EntroVec4 = s3 + Cp_constant*log(TempVec4/T4) ;
+
+plot(EntroVec4,TempVec4,'r',LineWidth=2)
+
+%% calculating and plotting P,v
+figure(2)
+hold on 
+grid on 
+xlabel("Specific Volume (m3/kg) ");
+ylabel("Pressure (kPa) ");
+title("P-v Diagram of IDEAL BRAYTON CYCLE");
+
+% plotting second and dourth part
+PresVec3 = [P2 P3];
+
+v1 = R*T1/P1;
+v2 = (R*T2)/P2;
+v3 = (R*T3)/P3;
+v4 = (R*T4)/P4;
+
+VolVec1 = [v2 v3];
+plot(VolVec1,PresVec3,'b',LineWidth=2)
+
+PresVec4 = [P4 P1];
+VolVec2 = [v4 v1];
+plot(VolVec2,PresVec4,'b',LineWidth=2)
+
+% plotting first part
+
+PresVec5 = linspace(P1, P2, 100);
+TempVec5 = T1 * (PresVec5/P1).^((k-1)/k);
+VolVec3 = R.*TempVec5./PresVec5 ;
+
+plot(VolVec3,PresVec5,'b',LineWidth=2)
+
+% plotting third part
+
+PresVec6 = linspace(P3, P4, 100);
+TempVec6 = T3 * (PresVec6/P3).^((k-1)/k);
+VolVec4 = R.*TempVec6./PresVec6 ;
+
+plot(VolVec4,PresVec6,'b',LineWidth=2)
+
+
+%% REAL BRAYTON CYCLE (Isentropic efficiencies of C and T)
+
+% calculating ideal enthalpies 
+h1 = 0; % kJ/kg-K
+h2 = Cp_constant*(T2-T1) + h1 ;% kJ/kg-K
+h3 = Cp_constant*(T3-T2) + h2 ;% kJ/kg-K
+h4 = Cp_constant*(T4-T3) + h3 ;% kJ/kg-K
+
+
+% calculating real enthalpies 
+h1a = h1;
+h2a = (h2-h1)/eff_comp + h1;
+h3a = h3;
+h4a = h3 - eff_turb*(h3 - h4);
+
+
+% calculating real temperatures 
+T1a = T1;
+T2a = (T2-T1)/eff_comp + T1;
+T3a = T3;
+T4a = T3 - eff_turb*(T3 - T4);
+
+
+% calculating quantities
+q_in_R = h3a - h2a;
+q_out_R = h4a - h1a;
+w_in_comp_R = h2a - h1a;
+w_out_turb_R = h3a - h4a;
+eff_th_real = (w_out_turb_R - w_in_comp_R)/q_in_R ;
+
+
+fprintf("REAL BRAYTON CYCLE RESULTS \n\n")
+fprintf("Thermal Efficiency of overall cycle: %f \n", eff_th_real)
+fprintf("heat input in one cycle (in kJ/kg): %f \n", q_in_R)
+fprintf("heat output in one cycle (in kJ/kg): %f \n", q_out_R)
+fprintf("work input of compressor in one cycle (in kJ/kg): %f \n", w_in_comp_R)
+fprintf("work output of turbine in one cycle (in kJ/kg): %f \n", w_out_turb_R )
+fprintf("real back work ratio is: %f \n\n", w_in_comp_R/w_out_turb_R )
+
+
+%% calculating and plotting real T,s
+
+% calculating entropy real
+s1a = 0; % takin reference entropy to be zero
+s2a = s1a + Cp_constant*log(T2a/T1a) - R*log(P2/P1);
+s3a = s2a + Cp_constant*log(T3a/T2a) - R*log(P3/P2);
+s4a = s3a + Cp_constant*log(T4a/T3a) - R*log(P4/P3); 
+
+figure(3)
+hold on 
+grid on 
+xlabel("Entropy (kJ/kg-K)");
+ylabel("Temperature (K)");
+title("T-s Diagram of REAL BRAYTON CYCLE");
+
+
+% plotting first and third part
+TempVec1a = [T1a T2a];
+EntroVec1a = [s1a s2a];
+plot(EntroVec1a,TempVec1a,'k',LineWidth=2)
+
+TempVec3a = [T3a T4a];
+EntroVec3a = [s3a s4a ];
+plot(EntroVec3a,TempVec3a,'k',LineWidth=2)
+
+
+% plotting second part
+TempVec2a = linspace(T2a,T3a,99);
+PresVec1a = P2*ones(1,99);
+EntroVec2a = s2a + Cp_constant*log(TempVec2a/T2a);
+
+plot(EntroVec2a,TempVec2a,'k',LineWidth=2)
+
+% plotting fourth part
+TempVec4a = linspace(T4a,T1a,99);
+PresVec2a = P1*ones(1,99);
+EntroVec4a = s4a + Cp_constant*log(TempVec4a/T4a) ;
+
+plot(EntroVec4a,TempVec4a,'k',LineWidth=2)
+
+%% calculating and plotting P,v
+figure(4)
+hold on 
+grid on 
+xlabel("Specific Volume (m3/kg) ");
+ylabel("Pressure (kPa) ");
+title("P-v Diagram of REAL BRAYTON CYCLE");
+
+% plotting second and dourth part
+PresVec3a = [P2 P3];
+
+v1a = R*T1a/P1;
+v2a = (R*T2a)/P2;
+v3a = (R*T3a)/P3;
+v4a = (R*T4a)/P4;
+
+VolVec1a = [v2a v3a];
+plot(VolVec1a,PresVec3a,'g',LineWidth=2)
+
+PresVec4a = [P4 P1];
+VolVec2a = [v4a v1a];
+plot(VolVec2a,PresVec4a,'g',LineWidth=2)
+
+% plotting first part
+
+PresVec5a = linspace(P1, P2, 100);
+TempVec5a = T1a * (PresVec5a/P1).^((k-1)/k);
+VolVec3a = R.*TempVec5a./PresVec5a ;
+
+plot(VolVec3a,PresVec5a,'g',LineWidth=2)
+
+% plotting third part
+
+PresVec6a = linspace(P3, P4, 100);
+TempVec6a = T3a * (PresVec6a/P3).^((k-1)/k);
+VolVec4a = R.*TempVec6a./PresVec6a ;
+
+plot(VolVec4a,PresVec6a,'g',LineWidth=2)
+
+%% Pressure Sweep
+
+Cp_constant = 1.005;
+
+rp_vec = linspace(1.2,20,300);
+
+w_net = zeros(size(rp_vec));
+eta_th = zeros(size(rp_vec));
+
+for i = 1:length(rp_vec)
+    rp = rp_vec(i);
+
+    T2 = T1 * rp^((k-1)/k);
+    T4 = T3 / rp^((k-1)/k);
+
+    wc = Cp_constant*(T2 - T1);
+    wt = Cp_constant*(T3 - T4);
+
+    w_net(i) = wt - wc;
+    eta_th(i) = 1 - (T4 - T1)/(T3 - T2);
+end
+
+[wnet_max, idx] = max(w_net);
+rp_opt = rp_vec(idx);
+
+figure
+yyaxis left
+plot(rp_vec,w_net,'LineWidth',2)
+ylabel("Net work output (kJ/kg)")
+
+yyaxis right
+plot(rp_vec,eta_th,'LineWidth',2)
+ylabel("Thermal efficiency")
+
+xlabel("Pressure ratio")
+grid on
