@@ -1,5 +1,5 @@
 function WokringA4()
-    % Fixed Parameters
+    % Fixed Parameters(elements or fields inside a structure)
     p.T1 = 298.15;       % K
     p.P1 = 1.0;          % bar
     p.eta_c = 0.88;      % Compressor isentropic efficiency
@@ -18,9 +18,8 @@ function WokringA4()
     T3_range = 900:100:1400; % Celsius
     results = zeros(length(T3_range), 6); 
 
-    fprintf('\nSimulation Results (Rauch Optimization Method)\n');
+    fprintf('\n RESULTS \n');
     fprintf('T3(C)  rp1_opt  p7_opt(bar)  eta_BR(%%)  eta_RA(%%)  eta_COMB(%%)\n');
-    fprintf('-------------------------------------------------------------\n');
 
     for i = 1:length(T3_range)
         T3_K = T3_range(i) + 273.15;
@@ -36,8 +35,7 @@ function WokringA4()
         [eff_comb, eff_br, eff_ra] = calc_total_eff(x_opt, T3_K, p);
         results(i,:) = [T3_range(i), x_opt(1), x_opt(2), eff_br*100, eff_ra*100, eff_comb*100];
         
-        fprintf('%d    %6.2f    %7.2f      %6.2f      %6.2f      %6.2f\n', ...
-                results(i,1), results(i,2), results(i,3), results(i,4), results(i,5), results(i,6));
+        fprintf('%f    %f    %f      %f      %f      %f \n',results(i,1), results(i,2), results(i,3), results(i,4), results(i,5), results(i,6));
     end
 
    %% PLOTTING
@@ -53,7 +51,7 @@ function WokringA4()
     grid on; title('Optimal Operating Pressures');
     xlabel('T_3 [^\circC]');
     
-    % Final T-s Diagram Generation
+    % Final T-s Diagram 
     plot_ts_diagrams(results(4, :), p);
 end
 
@@ -74,7 +72,7 @@ function [eta_comb, eta_br, eta_ra] = calc_total_eff(x, T3, p)
     Q_in = p.Cp_g*T3 - p.Cp_a*T2; 
     eta_br = (W_gt - W_comp)/Q_in;
 
-    %% Rankine Cycle Calculation (Bottoming Cycle)
+    %% Rankine Cycle Calucaltions
     T10 = T4 - p.dT_stack; % Superheated steam temp
     % Approximating steam enthalpies (kJ/kg) based on P and T
     h10 = 2800 + 2.0*(T10 - 500) + 0.01*p7; 
@@ -82,11 +80,11 @@ function [eta_comb, eta_br, eta_ra] = calc_total_eff(x, T3, p)
     W_p = (p7 * 0.1) / p.eta_p; 
     h7 = h13 + W_p;
     
-    % Turbine exit enthalpy (approximate expansion)
+    % Turbine exit enthalpy
     h11 = h10 - p.eta_st * (h10 - 2100); 
     W_st = h10 - h11;
     
-    % Heat Balance: m_gas * Cp_g * (T4 - T_stack) = m_steam * (h10 - h7)
+    % Heat Balance
     T_stack = p.T13 + p.dT_pinch + 30; % Assumed stack temp
     Q_available = p.Cp_g * (T4 - T_stack);
     m_ratio = Q_available / (h10 - h7); % kg steam per kg gas
@@ -100,9 +98,9 @@ function [eta_comb, eta_br, eta_ra] = calc_total_eff(x, T3, p)
 end
 
 function [c, ceq] = dryness_constraint(x, T3, p)
-    % Constraint to keep dryness fraction x >= 0.92
+    % Constraint x >= 0.92
     p7 = x(2);
-    % Empirical dryness estimator based on P and T
+    % Empirical dryness based on P and T
     x_calc = 1.0 - (p7/500) + ( (T3-1000)/5000 );
     c = p.x_min - x_calc;
     ceq = [];
