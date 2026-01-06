@@ -13,3 +13,10 @@ For Assgn3
 -This study presents a thermodynamic analysis and numerical modeling of a conventional steam power plant operating on ideal and real Rankine cycles. The plant operates between a boiler pressure of 3 MPa and a condenser pressure of 75 kPa, with steam superheated to 350 °C at the turbine inlet. First-principles energy and entropy balances were used, with thermodynamic properties from standard steam tables (Çengel). Assumptions include steady-state operation, negligible kinetic and potential energy changes, idealized isentropic expansion and compression for the ideal cycle, and component efficiencies of 75% for the real cycle. The pump is modeled as a compressed-liquid device with constant specific volume, and the condenser exit fluid is saturated liquid.
 -For the ideal cycle, turbine work output is 713.1 kJ/kg, pump work input 3.03 kJ/kg, and net work 710.1 kJ/kg, yielding 26.0% thermal efficiency and a low back work ratio of 0.425%. In the real cycle, component inefficiencies slightly reduce net work and efficiency. T–s and h–s diagrams illustrate isentropic expansions, the saturation dome, and constant-pressure heat addition and rejection.
 -A parametric study shows that increasing boiler pressure raises heat addition temperature, turbine work, and efficiency, plateauing at high pressures due to practical material and superheat limits. The framework emphasizes accurate property evaluation, continuous thermodynamic paths, and ideal vs. real distinctions, providing quantitative and visual insights for engineering design, performance optimization, and educational purposes.
+
+
+
+
+FOR ASSGN 4 - Not that of a great solution that I uploaded as I found understanding the Rauch Optimization reseaech paper difficult to understand in the given time. 
+I have assumed many things and found a particular solution for that assumption. 
+Could not create a general solution like i did for Brayton and Rankine cycle because of time issue.
